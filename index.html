@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Will you be my Valentine?</title>
+  <style>
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: #fff0f6;
+      display:flex;
+      min-height:100vh;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      overflow:hidden;
+    }
+
+    /* floating hearts layer */
+    .hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .heart {
+      position: absolute;
+      bottom: -40px;
+      font-size: 22px;
+      opacity: 0.9;
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.08));
+      will-change: transform, opacity;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.95; }
+      100% { transform: translateY(-110vh) rotate(18deg); opacity: 0; }
+    }
+
+    /* confetti canvas */
+    #confetti{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .card{
+      position:relative;
+      z-index: 1;
+      background:white;
+      width:min(620px, 100%);
+      border-radius:20px;
+      padding:34px 28px 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+      text-align:center;
+    }
+
+    h1{ margin:0 0 10px; }
+    p{ margin:0 0 20px; color:#444; }
+
+    /* button area */
+    .buttons{
+      position:relative;
+      height:90px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:16px;              /* NORMAL SPACING */
+      margin-top:8px;
+      overflow:visible;
+    }
+
+    button{
+      border:0;
+      border-radius:16px;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:700;
+      padding:12px 18px;
+      min-width:150px;
+      height:48px;
+      user-select:none;
+      transition: transform 120ms ease;
+    }
+
+    #yesBtn{ background:#ff4d88; color:white; }
+    #noBtn{ background:#ffd6e7; color:#b0003a; }
+
+    /* when no starts escaping, we switch it to absolute */
+    #noBtn.escape {
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform: translate(70px, -50%); /* initial escape position */
+    }
+
+    .result{
+      display:none;
+      margin-top:0; /* looks nicer once title/subtext are hidden */
+    }
+    .result img{
+      width:100%;
+      border-radius:16px;
+      max-height:320px;
+      object-fit:cover;
+      margin-top:14px;
+    }
+    .small{
+      font-size:14px;
+      color:#666;
+      margin-top:10px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti"></canvas>
+
+  <div class="hearts" id="hearts"></div>
+
+  <div class="card">
+    <h1 id="question">will you be my valentine? 💘</h1>
+    <p id="subtext">think carefully 🥺</p>
+
+    <div class="buttons" id="btnArea">
+      <button id="yesBtn">YES</button>
+      <button id="noBtn">no</button>
+    </div>
+
+    <div class="result" id="result">
+      <h1>yayyy!! 💖</h1>
+      <p id="message">put your message here 🫶</p>
+
+      <img id="photo"
+        src="https://images.unsplash.com/photo-1520975693411-3cc2c1b3b2a1?auto=format&fit=crop&w=1200&q=80"
+        alt="photo" />
+
+      <p class="small">screenshot this moment 😌</p>
+    </div>
+  </div>
+
+  <script>
+    const noBtn   = document.getElementById("noBtn");
+    const yesBtn  = document.getElementById("yesBtn");
+    const btnArea = document.getElementById("btnArea");
+    const result  = document.getElementById("result");
+    const questionEl = document.getElementById("question");
+    const subtextEl  = document.getElementById("subtext");
+
+    // shrink settings
+    let noScale = 1;
+    const shrinkFactor = 0.88; // lower = faster shrink
+    const minScale = 0.25;
+
+    // OPTIONAL: make YES grow a bit
+    let yesScale = 1;
+    const yesGrowFactor = 1.05; // set to 1.0 to disable
+    const maxYesScale = 1.6;
+
+    let escaping = false;
+
+    function moveNoButton() {
+      const areaRect = btnArea.getBoundingClientRect();
+      const btnRect  = noBtn.getBoundingClientRect();
+
+      const padding = 6;
+      const maxX = areaRect.width  - btnRect.width  - padding;
+      const maxY = areaRect.height - btnRect.height - padding;
+
+      const x = Math.max(padding, Math.random() * maxX);
+      const y = Math.max(padding, Math.random() * maxY);
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+
+      // keep its scale while escaping
+      noBtn.style.transform = `scale(${noScale})`;
+    }
+
+    function shrinkNoGrowYes() {
+      noScale = Math.max(minScale, noScale * shrinkFactor);
+      noBtn.style.transform = `scale(${noScale})`;
+
+      yesScale = Math.min(maxYesScale, yesScale * yesGrowFactor);
+      yesBtn.style.transform = `scale(${yesScale})`;
+    }
+
+    noBtn.addEventListener("mouseenter", () => {
+      // first hover: switch to escape mode (so spacing can be normal at start)
+      if (!escaping) {
+        escaping = true;
+        noBtn.classList.add("escape");
+      }
+
+      // run + shrink
+      shrinkNoGrowYes();
+      moveNoButton();
+    });
+
+    // -------------------------
+    // confetti pop (short)
+    // -------------------------
+    const confettiCanvas = document.getElementById("confetti");
+    const ctx = confettiCanvas.getContext("2d");
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeConfetti);
+    resizeConfetti();
+
+    function confettiPop(durationMs = 900) {
+      const W = confettiCanvas.width;
+      const H = confettiCanvas.height;
+
+      const colors = ["#ff4d88", "#ff7ab2", "#ffd6e7", "#a855f7", "#67e4ca", "#fbbf24"];
+      const particles = [];
+      const count = 160;
+
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: W * (0.35 + Math.random() * 0.30),
+          y: H * 0.32,
+          vx: (Math.random() - 0.5) * 12,
+          vy: -(7 + Math.random() * 11),
+          g: 0.35 + Math.random() * 0.28,
+          w: 4 + Math.random() * 6,
+          h: 3 + Math.random() * 6,
+          rot: Math.random() * Math.PI,
+          vr: (Math.random() - 0.5) * 0.45,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 1
+        });
+      }
+
+      const start = performance.now();
+
+      function frame(t) {
+        const elapsed = t - start;
+        ctx.clearRect(0, 0, W, H);
+
+        particles.forEach(p => {
+          p.vy += p.g;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+          p.life -= 0.012;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+          ctx.restore();
+        });
+
+        if (elapsed < durationMs) {
+          requestAnimationFrame(frame);
+        } else {
+          ctx.clearRect(0, 0, W, H);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    yesBtn.addEventListener("click", () => {
+     
+      questionEl.style.display = "none";
+      subtextEl.style.display = "none";
+
+  
+      btnArea.style.display = "none";
+      result.style.display = "block";
+
+ 
+      confettiPop(900);
+    });
+
+
+    const heartsLayer = document.getElementById("hearts");
+    const heartEmojis = ["💖","💜","💚","💛","💙","🧡","❤️","🩷"];
+
+    function spawnHeart() {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+
+      const left = Math.random() * 100; // vw
+      const size = 16 + Math.random() * 18; // px
+      const duration = 3.5 + Math.random() * 3.5; // seconds
+      const drift = (Math.random() * 80) - 40; // px
+
+      heart.style.left = left + "vw";
+      heart.style.fontSize = size + "px";
+      heart.style.animationDuration = duration + "s";
+      heart.style.transform = `translateX(${drift}px)`;
+
+      heartsLayer.appendChild(heart);
+
+      setTimeout(() => heart.remove(), (duration * 1000) + 200);
+    }
+
+    setInterval(spawnHeart, 220);
+  </script>
+</body>
+</html>
