@@ -298,12 +298,22 @@
       hoverCount++;
 
       // After enough hovers, show the final surrender line
-      if (hoverCount >= 14) {
-        subtextEl.textContent = finalLine;
+if (hoverCount >= 15) {
+  subtextEl.textContent = finalLine;
 
-        // Optional: make NO fade out once it "gives up"
-        noBtn.style.opacity = "0.25";
-      } else {
+  // NO button gives up completely
+  noBtn.style.opacity = "0";
+  noBtn.style.pointerEvents = "none";
+
+  // remove it after fade-out
+  setTimeout(() => {
+    noBtn.style.display = "none";
+  }, 300);
+
+  return; // stop further movement/shrinking
+}
+
+       else {
         // No repeats until cycle
         subtextEl.textContent = warningList[warningIndex];
         warningIndex++;
