@@ -48,26 +48,32 @@
       z-index: 10;
     }
 
+    /* DARK OMBRE CARD */
     .card{
       position:relative;
       z-index: 1;
       width:min(620px, 100%);
-      border-radius:20px;
+      border-radius:22px;
       padding:34px 28px 30px;
       text-align:center;
-      box-shadow: 0 10px 30px rgba(0,0,0,.14);
 
-      /* darker ombre background */
-      background: linear-gradient(135deg,
-        rgba(24, 110, 36, 0.22),
-        rgba(92, 36, 163, 0.22)
-      );
-      border: 1px solid rgba(255,255,255,0.35);
-      backdrop-filter: blur(4px);
+      background: linear-gradient(135deg, #186E24, #5C24A3);
+
+      box-shadow:
+        0 20px 40px rgba(0,0,0,0.35),
+        inset 0 0 0 1px rgba(255,255,255,0.08);
     }
 
-    h1{ margin:0 0 10px; }
-    p{ margin:0 0 20px; color:#444; }
+    h1{
+      margin:0 0 10px;
+      color:#FFFFFF;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    }
+
+    p{
+      margin:0 0 20px;
+      color:#F1F1F1;
+    }
 
     /* button area */
     .buttons{
@@ -76,7 +82,7 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      gap:16px;              /* NORMAL SPACING */
+      gap:16px;
       margin-top:8px;
       overflow:visible;
     }
@@ -94,54 +100,64 @@
       transition: transform 120ms ease;
     }
 
-    #yesBtn{ background:#ff4d88; color:white; }
-    #noBtn{ background:#ffd6e7; color:#b0003a; }
+    #yesBtn{
+      background:#ff4d88;
+      color:white;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.20);
+    }
+    #noBtn{
+      background:#ffd6e7;
+      color:#b0003a;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.14);
+    }
 
     /* when no starts escaping, we switch it to absolute */
     #noBtn.escape {
       position:absolute;
       left:50%;
       top:50%;
-      transform: translate(70px, -50%); /* initial escape position */
+      transform: translate(70px, -50%);
     }
 
     .result{
       display:none;
-      margin-top:0; /* looks nicer once title/subtext are hidden */
+      margin-top:0;
     }
 
     /* show full image (no crop) */
     .result img{
       width:100%;
-      border-radius:16px;
-
+      border-radius:18px;
       object-fit: contain;
       max-height:420px;
 
-      background: rgba(255,255,255,0.55);
-      padding: 10px;
+      background: rgba(255,255,255,0.92);
+      padding: 12px;
       box-sizing: border-box;
 
-      margin-top:14px;
+      margin-top:16px;
     }
 
     .small{
       font-size:14px;
-      color:#666;
-      margin-top:10px;
+      color: rgba(255,255,255,0.75);
+      margin-top:14px;
     }
 
     /* message styling + colors */
-    #yayText { color: #CC3318; }
+    #yayText { color: #FF5A3D; }
+
     #message{
       font-size: 18px;
       line-height: 1.35;
       margin-top: 4px;
       margin-bottom: 16px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.25);
     }
-    .c-404 { color: #D62231; font-weight: 800; }
-    .c-surprise { color: #C8D64B; font-weight: 800; }
-    .c-val { color: #4BD69C; font-weight: 800; }
+
+    .c-404 { color: #FF3B3B; font-weight: 800; }
+    .c-surprise { color: #E6F05C; font-weight: 800; }
+    .c-val { color: #4DFFD1; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -223,7 +239,7 @@
     }
 
     noBtn.addEventListener("mouseenter", () => {
-      // first hover: switch to escape mode (so spacing can be normal at start)
+      // first hover: switch to escape mode
       if (!escaping) {
         escaping = true;
         noBtn.classList.add("escape");
