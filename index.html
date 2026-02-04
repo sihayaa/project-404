@@ -56,9 +56,7 @@
       border-radius:22px;
       padding:34px 28px 30px;
       text-align:center;
-
       background: linear-gradient(135deg, #186E24, #5C24A3);
-
       box-shadow:
         0 20px 40px rgba(0,0,0,0.35),
         inset 0 0 0 1px rgba(255,255,255,0.08);
@@ -73,6 +71,21 @@
     p{
       margin:0 0 20px;
       color:#F1F1F1;
+    }
+
+    /* subtext effects */
+    #subtext{
+      transition: color 200ms ease, transform 120ms ease;
+    }
+    .subtext-shake{
+      animation: subShake 220ms ease-in-out;
+    }
+    @keyframes subShake {
+      0%   { transform: translateX(0); }
+      25%  { transform: translateX(-4px); }
+      50%  { transform: translateX(4px); }
+      75%  { transform: translateX(-3px); }
+      100% { transform: translateX(0); }
     }
 
     /* button area */
@@ -97,7 +110,7 @@
       min-width:150px;
       height:48px;
       user-select:none;
-      transition: transform 120ms ease;
+      transition: transform 120ms ease, opacity 250ms ease;
     }
 
     #yesBtn{
@@ -168,7 +181,7 @@
 
   <div class="card">
     <h1 id="question">will you be my valentine? 💘</h1>
-    <p id="subtext">think carefully 🥺</p>
+    <p id="subtext">Think Carefully 🥺</p>
 
     <div class="buttons" id="btnArea">
       <button id="yesBtn">YES</button>
@@ -238,11 +251,86 @@
       yesBtn.style.transform = `scale(${yesScale})`;
     }
 
+    // Proper Caps messages (15+)
+    const warnings = [
+      "Think Carefully 🥺",
+      "Are You Absolutely Sure?",
+      "This Is A Big Decision 👀",
+      "You Might Want To Reconsider…",
+      "No Turning Back After This 😶",
+      "Last Chance To Choose Wisely",
+      "Your Mouse Seems Confused 🤔",
+      "That Button Is Dangerous",
+      "Error Detected: Hesitation",
+      "Hmm… Interesting Choice",
+      "Take A Deep Breath First",
+      "Is That Really Your Answer?",
+      "Destiny Is Watching 👁️",
+      "This Feels Like A Mistake",
+      "Okay But… Why Though?",
+      "The Universe Says Try Again ✨",
+      "You Know What The Right Answer Is 😌"
+    ];
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    let warningList = shuffle(warnings);
+    let warningIndex = 0;
+    let hoverCount = 0;
+
+    const finalLine = "Okay..fine you win...";
+    const brightSubtextColor = "#FFFFFF";
+
     noBtn.addEventListener("mouseenter", () => {
       // first hover: switch to escape mode
       if (!escaping) {
         escaping = true;
         noBtn.classList.add("escape");
+      }
+
+      hoverCount++;
+
+      // After enough hovers, show the final surrender line
+      if (hoverCount >= 14) {
+        subtextEl.textContent = finalLine;
+
+        // Optional: make NO fade out once it "gives up"
+        noBtn.style.opacity = "0.25";
+      } else {
+        // No repeats until cycle
+        subtextEl.textContent = warningList[warningIndex];
+        warningIndex++;
+
+        if (warningIndex >= warningList.length) {
+          warningList = shuffle(warnings);
+          warningIndex = 0;
+        }
+      }
+
+      // Shake after 5+ hovers
+      if (hoverCount >= 5) {
+        subtextEl.classList.remove("subtext-shake"); // restart animation
+        void subtextEl.offsetWidth;
+        subtextEl.classList.add("subtext-shake");
+      }
+
+      // Make text brighter after 10+ hovers (extra readable)
+      if (hoverCount >= 10) {
+        subtextEl.style.color = brightSubtextColor;
+      } else {
+        subtextEl.style.color = "";
+      }
+
+      // OPTIONAL: slightly faster shrink after 10 hovers
+      if (hoverCount >= 10) {
+        shrinkNoGrowYes();
       }
 
       // run + shrink
