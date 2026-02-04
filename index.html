@@ -51,12 +51,19 @@
     .card{
       position:relative;
       z-index: 1;
-      background:white;
       width:min(620px, 100%);
       border-radius:20px;
       padding:34px 28px 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.12);
       text-align:center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.14);
+
+      /* darker ombre background */
+      background: linear-gradient(135deg,
+        rgba(24, 110, 36, 0.22),
+        rgba(92, 36, 163, 0.22)
+      );
+      border: 1px solid rgba(255,255,255,0.35);
+      backdrop-filter: blur(4px);
     }
 
     h1{ margin:0 0 10px; }
@@ -102,18 +109,39 @@
       display:none;
       margin-top:0; /* looks nicer once title/subtext are hidden */
     }
+
+    /* show full image (no crop) */
     .result img{
       width:100%;
       border-radius:16px;
-      max-height:320px;
-      object-fit:cover;
+
+      object-fit: contain;
+      max-height:420px;
+
+      background: rgba(255,255,255,0.55);
+      padding: 10px;
+      box-sizing: border-box;
+
       margin-top:14px;
     }
+
     .small{
       font-size:14px;
       color:#666;
       margin-top:10px;
     }
+
+    /* message styling + colors */
+    #yayText { color: #CC3318; }
+    #message{
+      font-size: 18px;
+      line-height: 1.35;
+      margin-top: 4px;
+      margin-bottom: 16px;
+    }
+    .c-404 { color: #D62231; font-weight: 800; }
+    .c-surprise { color: #C8D64B; font-weight: 800; }
+    .c-val { color: #4BD69C; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -132,16 +160,17 @@
     </div>
 
     <div class="result" id="result">
-      <h1>YAYYY!! 💖</h1>
-      <p id="message">
-  Error 404: Surprise!!<br>
-  Hi, my Valentine 💘
-</p>
+      <h1 id="yayText">YAYYY!! 💖</h1>
 
+      <p id="message">
+        <span class="c-404">Error 404:</span>
+        <span class="c-surprise"> Surprise!!</span><br>
+        <span class="c-val">Hi, my Valentine 💘</span>
+      </p>
 
       <img id="photo"
-  src="https://raw.githubusercontent.com/sihayaa/project-404/refs/heads/main/ChatGPT%20Image%20Feb%204%2C%202026%2C%2009_13_10%20AM.png"
-  alt="photo" />
+        src="https://raw.githubusercontent.com/sihayaa/project-404/refs/heads/main/ChatGPT%20Image%20Feb%204%2C%202026%2C%2009_13_10%20AM.png"
+        alt="photo" />
 
       <p class="small">screenshot this moment 😌</p>
     </div>
@@ -275,18 +304,14 @@
     }
 
     yesBtn.addEventListener("click", () => {
-     
       questionEl.style.display = "none";
       subtextEl.style.display = "none";
 
-  
       btnArea.style.display = "none";
       result.style.display = "block";
 
- 
       confettiPop(900);
     });
-
 
     const heartsLayer = document.getElementById("hearts");
     const heartEmojis = ["💖","💜","💚","💛","💙","🧡","❤️","🩷"];
